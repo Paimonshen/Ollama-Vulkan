@@ -66,6 +66,10 @@ build.bat package
 
 等价于 `configure` → `build` → 组装成品到 `..\Ollama-Vulkan\`，之后可按提示打包为 `Ollama-Vulkan.zip`。
 
+## GitHub Actions 云编译
+
+仓库内置 `.github/workflows/build.yml`：推送到 `main` 时自动在 GitHub 服务器上安装 Vulkan SDK 并完成编译打包；推送 `v*` 标签时自动发布 Release，`Ollama-Vulkan.zip` 直接挂在附件。本地无需任何构建环境；`build.bat` 仍可用于离线构建。
+
 ## 同步上游更新
 
 `Source` 是一个干净的 Ollama 上游 checkout（`main` 分支 = 上游 c82ebbd）。同步最新上游：
