@@ -63,7 +63,7 @@ jobs:
           # GitHub Apps cannot push workflow files without `workflows` permission.
           rm -rf .github/workflows && mkdir -p .github/workflows && cp /tmp/our-workflows/* .github/workflows/ 2>/dev/null || true
           git add -A
-          git diff --cached --quiet || git commit --no-edit
+          git diff --cached --quiet || git commit -m "ci: restore our workflow files after upstream sync"
 
       - name: Push sync branch
         run: git push --force-with-lease origin sync/upstream
