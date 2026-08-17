@@ -50,11 +50,7 @@ jobs:
             echo "No new upstream commits since the last sync."
             exit 0
           fi
-          git merge --no-edit upstream/main
-          # This repo rewrites README.md as its own project page; keep that version.
-          git checkout sync/upstream -- README.md
-          git add README.md
-          git commit --amend --no-edit
+          git merge --no-edit -X ours upstream/main
 
       - name: Push sync branch
         run: git push --force-with-lease origin sync/upstream
