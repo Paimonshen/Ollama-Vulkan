@@ -50,25 +50,22 @@ jobs:
             echo "No new upstream commits since the last sync."
             exit 0
           fi
-          # Snapshot our workflow files before merge (to detect upstream additions)
-          BEFORE=$(git ls-files .github/workflows/ | sort)
-          # Use -X ours to keep our version for any conflicts (README.md, cmake, etc.)
+          # Record our workflow files before merge so we can restore them exactly.
+          mkdir -p /tmp/our-workflows
+          cp -r .github/workflows/ /tmp/our-workflows/ 2>/dev/null || true
+          # Use -X ours to keep our version for any conflicts.
           git merge --no-edit -X ours upstream/main || {
             echo "Merge had conflicts, resolving with -X ours strategy..."
             git checkout --ours .
             git add -A
             git commit --no-edit
           }
-          # Remove any workflow files that upstream added (we don't want them, and
-          # GitHub Apps can't push workflow files without `workflows` permission).
-          AFTER=$(git ls-files .github/workflows/ | sort)
-          NEW_FILES=$(comm -13 <(echo "$BEFORE") <(echo "$AFTER"))
-          if [ -n "$NEW_FILES" ]; then
-            echo "Removing upstream-added workflow files:"
-            echo "$NEW_FILES"
-            echo "$NEW_FILES" | xargs git rm -q
-            git commit -m "ci: drop upstream-added workflow files" --no-edit
-          fi
+          # Restore our exact workflow files (drop any upstream additions/modifications).
+          # GitHub Apps cannot push workflow files without `workflows` permission.
+          rm -rf .github/workflows
+          cp -r /tmp/our-workflows/.github/workflows .github/workflows
+          git add -A
+          git diff --cached --quiet || git commit --no-edit
 
       - name: Push sync branch
         run: git push --force-with-lease origin sync/upstream
