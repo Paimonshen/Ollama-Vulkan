@@ -50,9 +50,8 @@ jobs:
             echo "No new upstream commits since the last sync."
             exit 0
           fi
-          # Record our workflow files before merge so we can restore them exactly.
-          mkdir -p /tmp/our-workflows
-          cp -r .github/workflows/ /tmp/our-workflows/ 2>/dev/null || true
+          # Snapshot our workflow files before merge so we can restore them exactly.
+          git stash push -u -- .github/workflows/ || true
           # Use -X ours to keep our version for any conflicts.
           git merge --no-edit -X ours upstream/main || {
             echo "Merge had conflicts, resolving with -X ours strategy..."
@@ -62,8 +61,8 @@ jobs:
           }
           # Restore our exact workflow files (drop any upstream additions/modifications).
           # GitHub Apps cannot push workflow files without `workflows` permission.
-          rm -rf .github/workflows
-          cp -r /tmp/our-workflows/.github/workflows .github/workflows
+          git stash pop 2>/dev/null || true
+          git checkout HEAD -- .github/workflows/
           git add -A
           git diff --cached --quiet || git commit --no-edit
 
